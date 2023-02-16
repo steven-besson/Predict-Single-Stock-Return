@@ -1,0 +1,34 @@
+library(quantmod)
+library(C50)
+
+
+#Create a custom function
+GIMME.THAT.RETURN.AFTER.A.YEAR <- function(STOCK , RETURN)          {
+  library(quantmod)
+  getSymbols( STOCK , from="2015-7-6" , to=Sys.Date()+1 , 
+                                             auto.assign=F ) -> PRICE
+  ifelse(  lag.xts(PRICE[,6] , k=-252)  >=  (RETURN + 1)*PRICE[,6]  , 
+                                            "YES" , "NO" )  ->  TARGET
+  "GET.THAT.RETURN" -> colnames(TARGET)
+  ADX( PRICE[,2:4] , n=126 )  ->  PREDICTORS
+  data.frame( PREDICTORS , TARGET )  ->  ALL
+  na.omit(ALL) -> ALL
+  as.factor(ALL$GET.THAT.RETURN)  ->  ALL$GET.THAT.RETURN
+  set.seed(99)
+  sample( nrow(ALL) , 0.7*nrow(ALL) ) -> ROWS
+  ALL[ROWS, ]  ->  GOUDA
+  ALL[-ROWS, ]  ->  FETA
+  library(C50)
+  C5.0( GET.THAT.RETURN ~., data=GOUDA , trials=10) -> ORACLE
+  predict(ORACLE,FETA) -> OMEN
+  library(caret)
+  confusionMatrix(OMEN, FETA$GET.THAT.RETURN)  -> TEST.RESULTS
+  tail(PREDICTORS , 1) -> TODAY
+  library(formattable)
+  percent( predict(ORACLE , TODAY , type="prob") ) -> PREDICT.TODAY
+  list(TEST.RESULTS , PREDICT.TODAY)                                  }
+
+
+
+#Use the function
+GIMME.THAT.RETURN.AFTER.A.YEAR( STOCK="MSFT" ,  RETURN=0.19 )
